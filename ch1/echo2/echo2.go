@@ -7,10 +7,12 @@ import (
 )
 
 func main() {
-	s, sep := "", ""
-	for _, arg := range os.Args[0:] {
-		s += sep + arg
-		sep = ","
+	//s, sep := "", ""
+
+	for i, arg := range os.Args[0:] {
+		fmt.Println(i, arg)
+		//s += sep + arg
+		//sep = " "
 	}
-	fmt.Println(s)
+	//fmt.Println(s)
 }
