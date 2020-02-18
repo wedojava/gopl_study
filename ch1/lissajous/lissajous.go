@@ -1,12 +1,10 @@
-package main
+package lissajous
 
 import (
-	"bytes"
 	"image"
 	"image/color"
 	"image/gif"
 	"io"
-	"io/ioutil"
 	"math"
 	"math/rand"
 	"os"
@@ -17,14 +15,15 @@ var palette = []color.Color{color.White, color.Black}
 const (
 	whiteIndex = 0
 	blackIndex = 1
+	CYCLES     = 5 // number of complete x oscillator revolutions 完整的x振荡器转数
 )
 
-func main() {
-	lissajous(os.Stdout)
+func Liss() {
+	Lissajous(os.Stdout, 10)
 }
-func lissajous(out io.Writer) {
+
+func Lissajous(out io.Writer, cycles float64) {
 	const (
-		cycles  = 5      // number of complete x oscillator revolutions 完整的x振荡器转数
 		res     = 0.0001 // angular revolution 角转
 		size    = 100    // image canvas covers [-size .. +size] 图片画布封面[-size .. + size]
 		nframes = 64     // number of animation frames 动画帧数
@@ -45,8 +44,10 @@ func lissajous(out io.Writer) {
 		anim.Delay = append(anim.Delay, delay)
 		anim.Image = append(anim.Image, img)
 	}
-	//gif.EncodeAll(out, &anim)
-	buf := new(bytes.Buffer)
+	gif.EncodeAll(out, &anim)
+
+	//	Export as gif picture
+	/*buf := new(bytes.Buffer)
 	err := gif.EncodeAll(buf, &anim)
 	if err != nil {
 		panic(err)
@@ -54,5 +55,5 @@ func lissajous(out io.Writer) {
 	err = ioutil.WriteFile("test.gif", buf.Bytes(), 0644)
 	if err != nil {
 		panic(err)
-	}
+	}*/
 }
