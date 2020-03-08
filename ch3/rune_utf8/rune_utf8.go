@@ -12,7 +12,11 @@ func main() {
 
 	for i := 0; i < len(s); {
 		r, size := utf8.DecodeRuneInString(s[i:])
-		fmt.Printf("%d\t%c\n", i, r)
+		fmt.Printf("%d\t%q\t%d\n", i, r, r)
 		i += size
+	}
+
+	for i, r := range s {
+		fmt.Printf("%d\t%q\t%d\n", i, r, r)
 	}
 }
