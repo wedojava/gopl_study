@@ -10,7 +10,6 @@
 //2       hello
 //2       world
 
-
 package main
 
 import (
@@ -43,7 +42,7 @@ func main() {
 	}
 }
 
-func countLines(f *os.File, counts map[string]int)  {
+func countLines(f *os.File, counts map[string]int) {
 	input := bufio.NewScanner(f)
 	for input.Scan() {
 		counts[input.Text()]++

@@ -19,13 +19,13 @@ var palette = []color.Color{
 		B: 0x00,
 		A: 0xff,
 	},
-	color.RGBA{  // invoke while blackIndex = 1
+	color.RGBA{ // invoke while blackIndex = 1
 		R: 0x00,
 		G: 0xff,
 		B: 0x00,
 		A: 0xff,
 	},
-	color.RGBA{  // invoke while blackIndex = 2
+	color.RGBA{ // invoke while blackIndex = 2
 		R: 0xff,
 		G: 0x00,
 		B: 0x00,

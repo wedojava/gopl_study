@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestEcho(t *testing.T)  {
-	tcs := []struct{
-		args	[]string
-		expects	string
+func TestEcho(t *testing.T) {
+	tcs := []struct {
+		args    []string
+		expects string
 	}{
 		{[]string{"echo"}, "echo\n"},
 		{[]string{"echo", "1", "2", "3"}, "echo 1 2 3\n"},
@@ -23,7 +23,7 @@ func TestEcho(t *testing.T)  {
 		ret := out.(*bytes.Buffer).String()
 		if ret != tc.expects {
 			t.Errorf("Echo Failed. Expects: \"%s\", Got \"%s\"", tc.expects, ret)
-			
+
 		}
 	}
 }

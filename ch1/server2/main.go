@@ -18,7 +18,7 @@ var mu sync.Mutex
 var count int
 
 func main() {
-	http.HandleFunc("/", handler) // each request calls handler
+	http.HandleFunc("/", handler)      // each request calls handler
 	http.HandleFunc("/count", counter) // each request calls handler
 	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
@@ -37,4 +37,5 @@ func counter(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Count %d\n", count)
 	mu.Unlock()
 }
+
 //!-

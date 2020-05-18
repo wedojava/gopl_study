@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func TestFetch(t *testing.T)  {
-	var tcs = []struct{
+func TestFetch(t *testing.T) {
+	var tcs = []struct {
 		args []string
 	}{
 		{[]string{"fetch", "gopl.io"}},

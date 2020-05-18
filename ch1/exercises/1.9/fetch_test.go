@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-func TestFetch(t *testing.T)  {
-	var tcs = []struct{
-		args []string
+func TestFetch(t *testing.T) {
+	var tcs = []struct {
+		args    []string
 		expects string
 	}{
 		{[]string{"fetch", "gopl.io"}, "resp.Status 200 OK\n"},
