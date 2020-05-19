@@ -3,6 +3,9 @@
 package github
 
 import (
+	"fmt"
+	"net/http"
+	"os"
 	"time"
 )
 
@@ -29,4 +32,15 @@ type Issue struct {
 type User struct {
 	Login   string
 	HTMLURL string `json:"html_url"`
+}
+
+func setAuthorization(req *http.Request) error {
+	// req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_PASS"))
+	// os.Setenv("GITHUB_TOKEN", "your github token string")
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		return fmt.Errorf("GITHUB_TOKEN is not set")
+	}
+	req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
+	return nil
 }

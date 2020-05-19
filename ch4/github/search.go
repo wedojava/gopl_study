@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -88,7 +87,7 @@ func EditIssue(owner, repo, number string, fields map[string]string) (*Issue, er
 	client := &http.Client{}
 	url := strings.Join([]string{APIURL, "repos", owner, repo, "issues", number}, "/")
 	req, err := http.NewRequest("PATCH", url, buf)
-	req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_PASS"))
+	setAuthorization(req)
 	if err != nil {
 		return nil, err
 	}

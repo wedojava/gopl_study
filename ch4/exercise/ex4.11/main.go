@@ -79,9 +79,10 @@ func _read(owner, repo, number string) {
 
 func _edit(owner, repo, number string) {
 	editor := os.Getenv("EDITOR")
-	if editor == "" {
-		editor = "vim"
-	}
+	editor = "nvim"
+	// if editor == "" {
+	//         editor = "vim"
+	// }
 	editorPath, err := exec.LookPath(editor)
 	if err != nil {
 		log.Fatal(err)
