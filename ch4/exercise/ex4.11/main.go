@@ -1,148 +1,125 @@
-// Build a tool lets users CRUD Github issues from CLI,
-// invoke there prefered text editor when substantial text input is required.
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"html/template"
 	"log"
 	"os"
-	"os/exec"
+	"time"
 
-	"gopl.io/ch4/github"
+	"gopl.io/ch4/exercise/ex4.11/github"
 )
 
-func main() {
-	if len(os.Args) < 2 {
-		usageDie()
-	}
-	cmd := os.Args[1]
-	args := os.Args[2:]
-	if cmd == "search" {
-		if len(args) < 1 {
-			usageDie()
-		}
-		search(args)
-		os.Exit(0)
-	}
-	if len(args) != 3 {
-		usageDie()
-	}
-	owner, repo, number := args[0], args[1], args[2]
-	switch cmd {
-	case "read":
-		_read(owner, repo, number)
-	case "edit":
-		_edit(owner, repo, number)
-	case "close":
-		_close(owner, repo, number)
-	case "open":
-		_open(owner, repo, number)
-	}
-}
-
-var usage string = `
-usage:
-search QWERY
-[read|edit|close|open] OWNER REPO ISSUE_NUMBER
+const usage = `usage:
+  create OWNER REPO
+  get    OWNER REPO ISSUE_NUMBER
+  edit   OWNER REPO ISSUE_NUMBER
+  close  OWNER REPO ISSUE_NUMBER
+  reopen OWNER REPO ISSUE_NUMBER
 `
 
-func usageDie() {
-	fmt.Fprintln(os.Stderr, usage)
-	os.Exit(1)
+var templ = template.Must(template.New("issue").Funcs(template.FuncMap{"formatTime": formatTime}).Parse(`
+Number: {{.Number}}
+URL: {{.HTMLURL}}
+User: {{.User.Login}}
+Title: {{.Title | printf "%.64s"}}
+State: {{.State}}
+Comments: {{.Comments}}
+Created: {{.CreatedAt | formatTime}}
+Updated: {{.UpdatedAt | formatTime}}
+
+{{if ne (len .Body) 0}}{{.Body}}{{else}}(no body){{end}}
+`))
+
+func main() {
+	if len(os.Args) == 4 {
+		command, owner, repo := os.Args[1], os.Args[2], os.Args[3]
+		switch command {
+		case "create":
+			_create(owner, repo)
+		default:
+			fmt.Fprintf(os.Stderr, usage)
+			os.Exit(1)
+		}
+	} else if len(os.Args) == 5 {
+		command, owner, repo, number := os.Args[1], os.Args[2], os.Args[3], os.Args[4]
+		switch command {
+		case "get":
+			_get(owner, repo, number)
+		case "edit":
+			_edit(owner, repo, number)
+		case "close":
+			_close(owner, repo, number)
+		case "reopen":
+			_reopen(owner, repo, number)
+		default:
+			fmt.Fprintf(os.Stderr, usage)
+			os.Exit(1)
+		}
+	} else {
+		fmt.Fprintf(os.Stderr, usage)
+		os.Exit(1)
+	}
+
 }
 
-func search(query []string) {
-	result, err := github.SearchIssues(query)
+func _create(owner, repo string) {
+	fields := map[string]string{
+		"title": "",
+		"body":  "",
+	}
+	err := editor.Edit(fields)
 	if err != nil {
 		log.Fatal(err)
 	}
-	format := "#%-5d %9.9s %.55s\n"
-	for _, i := range result.Items {
-		fmt.Printf(format, i.Number, i.User.Login, i.Title)
+
+	err = github.CreateIssue(owner, repo, fields)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
-func _read(owner, repo, number string) {
+func _get(owner, repo, number string) {
 	issue, err := github.GetIssue(owner, repo, number)
 	if err != nil {
 		log.Fatal(err)
 	}
-	body := issue.Body
-	if body == "" {
-		body = "<empty>\n"
-	}
-	fmt.Printf("repo: %s/%s\nnumber: %s\nuser: %s\ntitle: %s\n\n%s",
-		owner, repo, number, issue.User.Login, issue.Title, body)
+	templ.Execute(os.Stdout, issue)
 }
 
 func _edit(owner, repo, number string) {
-	editor := os.Getenv("EDITOR")
-	editor = "nvim"
-	// if editor == "" {
-	//         editor = "vim"
-	// }
-	editorPath, err := exec.LookPath(editor)
-	if err != nil {
-		log.Fatal(err)
-	}
-	tempfile, err := ioutil.TempFile("", "issue_crud")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer tempfile.Close()
-	defer os.Remove(tempfile.Name())
-
 	issue, err := github.GetIssue(owner, repo, number)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	encoder := json.NewEncoder(tempfile)
-	err = encoder.Encode(map[string]string{
+	fields := map[string]string{
 		"title": issue.Title,
-		"state": issue.State,
 		"body":  issue.Body,
-	})
+	}
+	err = editor.Edit(fields)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	cmd := &exec.Cmd{
-		Path:   editorPath,
-		Args:   []string{editor, tempfile.Name()},
-		Stdin:  os.Stdin,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-	}
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tempfile.Seek(0, 0)
-	fields := make(map[string]string, 0)
-	if err = json.NewDecoder(tempfile).Decode(&fields); err != nil {
-		log.Fatal(err)
-	}
-	_, err = github.EditIssue(owner, repo, number, fields)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-}
-
-func _close(owner, repo, number string) {
-	_, err := github.EditIssue(owner, repo, number, map[string]string{"state": "closed"})
+	err = github.UpdateIssue(owner, repo, number, fields)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func _open(owner, repo, number string) {
-	_, err := github.EditIssue(owner, repo, number, map[string]string{"state": "open"})
+func close(owner, repo, number string) {
+	err := github.CloseIssue(owner, repo, number)
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func reopen(owner, repo, number string) {
+	err := github.ReopenIssue(owner, repo, number)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func formatTime(t time.Time) string {
+	return t.Format("2006-01-02 15:04:05")
 }
