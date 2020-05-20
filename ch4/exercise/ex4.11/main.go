@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"gopl.io/ch4/exercise/ex4.11/editor"
 	"gopl.io/ch4/exercise/ex4.11/github"
 )
 
@@ -106,14 +107,14 @@ func _edit(owner, repo, number string) {
 	}
 }
 
-func close(owner, repo, number string) {
+func _close(owner, repo, number string) {
 	err := github.CloseIssue(owner, repo, number)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func reopen(owner, repo, number string) {
+func _reopen(owner, repo, number string) {
 	err := github.ReopenIssue(owner, repo, number)
 	if err != nil {
 		log.Fatal(err)
