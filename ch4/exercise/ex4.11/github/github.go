@@ -44,7 +44,8 @@ func getIssuesURL(owner, repo string) string {
 
 func setAuthorization(req *http.Request) error {
 	// req.SetBasicAuth(os.Getenv("GITHUB_USER"), os.Getenv("GITHUB_PASS"))
-	// os.Setenv("GITHUB_TOKEN", "your github token string")
+	// My env cannot fix no token error,so ...
+	os.Setenv("GITHUB_TOKEN", "<your_token_string>")
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
 		return fmt.Errorf("GITHUB_TOKEN is not set")
