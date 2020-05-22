@@ -3,9 +3,12 @@
 package github
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -51,4 +54,28 @@ func setAuthorization(req *http.Request) error {
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("token %s", token))
 	return nil
+}
+
+func SearchIssues(terms []string) (*IssuesSearchResult, error) {
+	q := url.QueryEscape(strings.Join(terms, " "))
+	resp, err := http.Get(IssuesURL + "?q=" + q)
+	if err != nil {
+		return nil, err
+	}
+
+	// We must close resp.Body on all execution paths.
+	// solved at chapter 5
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, fmt.Errorf("search query failed: %s", resp.Status)
+	}
+
+	var result IssuesSearchResult
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		resp.Body.Close()
+		return nil, err
+	}
+
+	resp.Body.Close()
+	return &result, nil
 }
