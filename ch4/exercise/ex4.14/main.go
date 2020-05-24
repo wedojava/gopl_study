@@ -73,7 +73,7 @@ var userTable = `
 `
 
 var issuesTemplate = template.Must(template.New("issues").Parse(navigation + issueTable))
-var milestonesTemplate = template.Must(template.New("milestones").Parse(navigation + issueTable))
+var milestonesTemplate = template.Must(template.New("milestones").Parse(navigation + milestoneTable))
 var usersTemplate = template.Must(template.New("users").Parse(navigation + userTable))
 var issues []github.Issue
 var milestones []github.Milestone
