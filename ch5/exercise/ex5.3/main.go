@@ -1,6 +1,7 @@
 // Write a function to print the contents of all text nodes in an HTML document tree.
 // Do not descend into <script> or <style> elements,
 // since their contents are not visible in a web browser.
+// go run gopl.io/ch1/fetch https://golang.org | go run main.go
 package main
 
 import (
