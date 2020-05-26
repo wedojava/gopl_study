@@ -42,17 +42,14 @@ func countWordsAndImages(n *html.Node) (words, images int) {
 	if n == nil {
 		return
 	}
+	if n.Type == html.ElementNode && (n.Data == "script" || n.Data == "style") {
+		return countWordsAndImages(n.NextSibling)
+	}
 	if n.Type == html.TextNode {
 		words += len(strings.Fields(n.Data))
 	}
 	if n.Type == html.ElementNode && n.Data == "img" {
 		images++
-		// to indeed href is not null
-		// for _, a := range n.Attr {
-		//         if a.Key == "href" && a.Val != "" {
-		//                 images++
-		//         }
-		// }
 	}
 	cwords, cimages := countWordsAndImages(n.FirstChild)
 	swords, simages := countWordsAndImages(n.NextSibling)
