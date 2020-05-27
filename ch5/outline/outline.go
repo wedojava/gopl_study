@@ -3,6 +3,7 @@
 // go build gopl.io/ch1/fetch
 // go build gopl.io/ch5/outline
 // ./fetch https://golang.org | ./outline
+// go run gopl.io/ch1/fetch https://gopl.io | go run outline.go
 package main
 
 import (
