@@ -64,12 +64,12 @@ func (pp PrettyPrinter) startElement(n *html.Node) {
 	for _, a := range n.Attr {
 		attrs = append(attrs, fmt.Sprintf(`%s="%s"`, a.Key, a.Val))
 	}
-	attrStr := ""
+	attrStr := " "
 	if len(n.Attr) > 0 {
 		attrStr = " " + strings.Join(attrs, " ")
 	}
 	name := n.Data
-	pp.printf("%*s<%s%s%s\n", depth*2, "", name, attrStr, end)
+	pp.printf("%*s<%s %s%s\n", depth*2, "", name, attrStr, end)
 	depth++
 }
 

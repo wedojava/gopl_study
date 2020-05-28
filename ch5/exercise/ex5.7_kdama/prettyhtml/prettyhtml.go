@@ -32,7 +32,7 @@ func startElement(w io.Writer, n *html.Node) {
 		fmt.Fprintf(w, "%*s<%s", depth*2, "", n.Data)
 		if len(n.Attr) > 0 {
 			for _, attr := range n.Attr {
-				fmt.Fprintf(w, "%s=%q", attr.Key, attr.Val)
+				fmt.Fprintf(w, " %s=%q", attr.Key, attr.Val)
 			}
 		}
 		if isSelfClosableTag(n.Data) && n.FirstChild == nil {
