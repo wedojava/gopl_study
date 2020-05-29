@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	"sort"
 )
 
 var prereqs = map[string][]string{
 	"algorithms": {"data structures"},
 	"calculus":   {"linear algebra"},
-	"complilers": {
+	"compilers": {
 		"data structures",
 		"formal languages",
 		"computer organization",
@@ -28,25 +27,51 @@ func main() {
 	}
 }
 
-func topoSort(m map[string][]string) []string {
-	var order []string
+// method from kdama/gopl
+func topoSort(m map[string][]string) map[int]string {
+	order := make(map[int]string)
 	seen := make(map[string]bool)
-	// Have to do these two steps below, they cannot been combined
 	var visitAll func(items []string)
+
 	visitAll = func(items []string) {
 		for _, item := range items {
 			if !seen[item] {
 				seen[item] = true
 				visitAll(m[item])
-				order = append(order, item)
+				order[len(order)] = item
 			}
 		}
 	}
+
 	var keys []string
 	for key := range m {
 		keys = append(keys, key)
 	}
-	sort.Strings(keys)
+
 	visitAll(keys)
 	return order
 }
+
+// method from korbiak/gopl
+// func topoSort(m map[string][]string) []string {
+//         var order []string
+//         seen := make(map[string]bool)
+//         // Have to do these two steps below, they cannot been combined
+//         var visitAll func(items []string)
+//         visitAll = func(items []string) {
+//                 for _, item := range items {
+//                         if !seen[item] {
+//                                 seen[item] = true
+//                                 visitAll(m[item])
+//                                 order = append(order, item)
+//                         }
+//                 }
+//         }
+//         var keys []string
+//         for key := range m {
+//                 keys = append(keys, key)
+//         }
+//         sort.Strings(keys)
+//         visitAll(keys)
+//         return order
+// }
