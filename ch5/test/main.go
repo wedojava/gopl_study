@@ -10,8 +10,8 @@ func main() {
 	var rmdirs []func()
 
 	// TODO: Need to be understanded!
-	for _, dir := range tempDirs() {
-		// dir := d
+	for _, d := range tempDirs() {
+		dir := d
 		os.MkdirAll(dir, 0755)
 		rmdirs = append(rmdirs, func() {
 			os.RemoveAll(dir)
