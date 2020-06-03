@@ -21,7 +21,8 @@ func main() {
 	for _, rmdir := range rmdirs {
 		rmdir()
 	}
-
+	linenum, name := 12, "count"
+	errorf(linenum, "undefined: %s", name)
 }
 
 func tempDirs() []string {
@@ -31,6 +32,12 @@ func tempDirs() []string {
 		"./test3",
 		"./test4",
 	}
+}
+
+func errorf(linenum int, format string, args ...interface{}) {
+	fmt.Fprintf(os.Stderr, "Line %d ", linenum)
+	fmt.Fprintf(os.Stderr, format, args...)
+	fmt.Fprintln(os.Stderr)
 }
 
 // func tempDirs() []string {
