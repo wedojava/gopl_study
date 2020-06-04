@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"golang.org/x/net/html"
-	"gopl.io/ch5/exercise/ex5.7_kdama/prettyhtml"
+	"gopl.io/ch5/exercise/ex5.07_kdama/prettyhtml"
 )
 
 var depth int
