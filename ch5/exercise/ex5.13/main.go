@@ -83,10 +83,10 @@ func save(rawurl string) error {
 
 func crawl(url string) []string {
 	fmt.Println(url)
-	err := save(url)
-	if err != nil {
-		log.Printf(`can't cache "%s": %s`, url, err)
-	}
+	// err := save(url)
+	// if err != nil {
+	//         log.Printf(`can't cache "%s": %s`, url, err)
+	// }
 	list, err := links.Extract(url)
 	if err != nil {
 		log.Printf(`can't extract links from "%s": %s`, url, err)
