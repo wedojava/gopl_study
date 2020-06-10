@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"math"
 )
 
 type Point struct{ X, Y float64 }
@@ -27,4 +28,13 @@ func main() {
 	p.ScaleBy(2)
 	q.ScaleBy(2)
 	fmt.Println(p.Distance(q.Point)) // "10"
+}
+
+func (p *Point) ScaleBy(factor float64) {
+	p.X *= factor
+	p.Y *= factor
+}
+
+func (p *Point) Distance(q Point) float64 {
+	return math.Hypot(q.X-p.X, q.Y-p.Y)
 }
