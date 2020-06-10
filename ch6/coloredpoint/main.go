@@ -38,3 +38,22 @@ func (p *Point) ScaleBy(factor float64) {
 func (p *Point) Distance(q Point) float64 {
 	return math.Hypot(q.X-p.X, q.Y-p.Y)
 }
+
+func init() {
+	fmt.Println("init() start")
+	red := color.RGBA{255, 0, 0, 255}
+	blue := color.RGBA{0, 0, 255, 255}
+
+	type ColoredPoint struct {
+		*Point
+		Color color.RGBA
+	}
+
+	p := ColoredPoint{&Point{1, 1}, red}
+	q := ColoredPoint{&Point{5, 4}, blue}
+	fmt.Println(p.Distance(*q.Point)) // "5"
+	q.Point = p.Point
+	p.ScaleBy(2)
+	fmt.Println(*p.Point, *q.Point) // {2 2} {2 2}
+	fmt.Println("init() over")
+}
