@@ -56,30 +56,31 @@ func (x byYear) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
 
 func main() {
 	fmt.Println("By Artist:")
-	sort.Sort(byArtist(tracks))
+	sort.Sort(byArtist(tracks)) // convert tracks to the type byArtist, then sort!
 	printTracks(tracks)
 
 	fmt.Println("\nReverse(byArtist):")
-	sort.Sort(sort.Reverse(byArtist(tracks)))
+	sort.Sort(sort.Reverse(byArtist(tracks))) // convert tracks to the type byArtist, then Reverse, then sort!
 	printTracks(tracks)
 
 	fmt.Println(" \nbyYear:")
-	sort.Sort(byYear(tracks))
+	sort.Sort(byYear(tracks)) // convert tracks to the type byYear, then sort!
 	printTracks(tracks)
 
 	fmt.Println("\nCustom:")
 	sort.Sort(customSort{tracks, func(x, y *Track) bool {
-		if x.Title != y.Title {
+		if x.Title != y.Title { // Primary sort key
 			return x.Title < y.Title
 		}
-		if x.Year != y.Year {
+		if x.Year != y.Year { // Secondary sort key
 			return x.Year < y.Year
 		}
-		if x.Length != y.Length {
+		if x.Length != y.Length { // Tertiary sort key
 			return x.Length < y.Length
 		}
 		return false
 	}})
+	printTracks(tracks)
 }
 
 type customSort struct {
