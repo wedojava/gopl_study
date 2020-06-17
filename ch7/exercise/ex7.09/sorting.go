@@ -168,6 +168,12 @@ func (x *byColumns) selected(s string) {
 		s = "title"
 		f = colTitle
 	}
+	// At the begining of program, x.columns is nil, because columns title hadn't be clicked.
+	// so this func will not invoke by doSort.
+	// if default case be used and x.columns have title and colTitle in x.
+	// after times click column title, x.columns will have the list of column name.
+	// This loop go on if only `s` match column name in x.columns
+	// else skip the loop and add it to x.columns
 	for i, c := range x.columns {
 		if c.name == s {
 			if i != 0 {
@@ -176,6 +182,9 @@ func (x *byColumns) selected(s string) {
 			return
 		}
 	}
+	// every column have Less func and column name at the same time at once after append.
+	// if c.name != s after all loop, then add this new column item to x.columns
+	// else it will match `i != 0` and return.
 	x.columns = append(x.columns, &Column{f: f, name: s})
 	i := len(x.columns) - 1
 	if i != 0 {
