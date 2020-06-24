@@ -1,4 +1,4 @@
-// go run main.go div div h2
+// go run main.go div class=d1 p id=p2 < examples/in.html
 package main
 
 import (
@@ -7,15 +7,16 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 )
 
 func main() {
-	src := fetch("http://www.w3.org/TR/2006/REC-xml11-20060816")
-	dec := xml.NewDecoder(bytes.NewBuffer(src))
-	// dec := xml.NewDecoder(os.Stdin)
+	// src := fetch("http://www.w3.org/TR/2006/REC-xml11-20060816")
+	// dec := getDec("examples/in.html")
+	dec := xml.NewDecoder(os.Stdin)
 	var stack []string            // stack of element names
 	var attrs []map[string]string // stack of element attributes
 	for {
@@ -38,11 +39,21 @@ func main() {
 			stack = stack[:len(stack)-1] // pop
 			attrs = attrs[:len(attrs)-1]
 		case xml.CharData:
-			if containsAll(stack, os.Args[1:]) {
+			if containsAll(toStringSlice(stack, attrs), os.Args[1:]) {
+				// if containsAll(toStringSlice(stack, attrs), []string{"div", "class=d1", "p", "id=p2"}) {
 				fmt.Printf("%s: %s\n", strings.Join(stack, " "), tok)
 			}
 		}
 	}
+}
+
+func getDec(file string) *xml.Decoder {
+	f, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	r := xml.NewDecoder(bytes.NewBuffer(f))
+	return r
 }
 
 // containsAll reports whether x contains the elements of y, in order.
