@@ -1,3 +1,4 @@
+// go run main.go div class=d1 p id=p2 < examples/in.html
 package main
 
 import (
@@ -5,178 +6,19 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"strings"
-	"text/scanner"
 )
 
-// Lexer taken from gopl.io/ch5/eval
-type lexer struct {
-	scan  scanner.Scanner
-	token rune // current lookahead token
-}
-
-// describe returns a string describing the current token, for use in errors.
-func (lex *lexer) describe() string {
-	switch lex.token {
-	case scanner.EOF:
-		return "end of file"
-	case scanner.Ident:
-		return fmt.Sprintf("identifier %s", lex.text())
-	}
-	return fmt.Sprintf("%q", rune(lex.token)) // any other rune
-}
-
-func (lex *lexer) eatWhitespace() int {
-	i := 0
-	for lex.token == ' ' || lex.token == '\t' {
-		lex.next()
-		i++
-	}
-	return i
-}
-
-func (lex *lexer) next()        { lex.token = lex.scan.Scan() }
-func (lex *lexer) text() string { return lex.scan.TokenText() }
-
-type lexPanic string
-
-type selector struct {
-	tag   string
-	attrs []attribute
-}
-
-func (s selector) String() string {
-	b := &bytes.Buffer{}
-	b.WriteString(s.tag)
-	for _, attr := range s.attrs {
-		switch attr.Value {
-		case "":
-			fmt.Fprintf(b, "[%s]", attr.Name)
-		default:
-			fmt.Fprintf(b, `[%s="%s"]`, attr.Name, attr.Value)
-		}
-	}
-	return b.String()
-}
-
-type attribute struct {
-	Name, Value string
-}
-
-func attrMatch(selAttrs []attribute, xmlAttrs []xml.Attr) bool {
-SelectorAttribute:
-	for _, sa := range selAttrs {
-		for _, xa := range xmlAttrs {
-			if sa.Name == xa.Name.Local && sa.Value == xa.Value || sa.Value == "" {
-				continue SelectorAttribute
-			}
-		}
-		return false
-	}
-	return true
-}
-
-func parseSelectors(input string) (_ []selector, err error) {
-	defer func() {
-		switch x := recover().(type) {
-		case nil:
-			// no panic
-		case lexPanic:
-			err = fmt.Errorf("%s", x)
-		default:
-			// unexpected panic: resume state of panic.
-			panic(x)
-		}
-	}()
-
-	lex := new(lexer)
-	lex.scan.Init(strings.NewReader(input))
-	lex.scan.Mode = scanner.ScanIdents | scanner.ScanStrings
-	lex.scan.Whitespace = 0 // handle whitespace ourselves
-	lex.next()              // initial lookahead
-
-	selectors := make([]selector, 0)
-	for lex.token != scanner.EOF {
-		selectors = append(selectors, parseSelector(lex))
-	}
-	return selectors, nil
-}
-
-// selector = tag
-//          | tag attr ...
-//          | attr ...
-func parseSelector(lex *lexer) selector {
-	var sel selector
-	lex.eatWhitespace()
-	if lex.token != '[' {
-		if lex.token != scanner.Ident {
-			panic(lexPanic(fmt.Sprintf("got %s, want ident", lex.describe())))
-		}
-		sel.tag = lex.text()
-		lex.next() // consume tag ident
-	}
-	for lex.token == '[' {
-		sel.attrs = append(sel.attrs, parseAttr(lex))
-	}
-	return sel
-}
-
-// attr = '[' name '=' value ']'
-func parseAttr(lex *lexer) attribute {
-	var attr attribute
-	lex.next() // consume '['
-	if lex.token != scanner.Ident {
-		panic(lexPanic(fmt.Sprintf("got %s, want ident", lex.describe())))
-	}
-	attr.Name = lex.text()
-	lex.next()            // consume ident
-	if lex.token != '=' { // No value given for the attribute.
-		if lex.token != ']' {
-			panic(lexPanic(fmt.Sprintf("got %s, want ']'", lex.describe())))
-		}
-		lex.next() // consume ']'
-		return attr
-	}
-	lex.next() // consume '='
-	switch lex.token {
-	case scanner.Ident:
-		attr.Value = lex.text()
-	case scanner.String:
-		attr.Value = strings.Trim(lex.text(), `"`)
-	default:
-		panic(lexPanic(fmt.Sprintf("got %s, want ident or string", lex.describe())))
-	}
-	lex.next() // consume value
-	if lex.token != ']' {
-		panic(lexPanic(fmt.Sprintf("got %s, want ']'", lex.describe())))
-	}
-	lex.next() // consume ']'
-	return attr
-}
-
-func isSelected(stack []xml.StartElement, sels []selector) bool {
-	if len(stack) < len(sels) {
-		return false
-	}
-	start := len(sels) - len(stack)
-	stack = stack[start:]
-	for i := 0; i < len(sels); i++ {
-		sel := sels[i]
-		el := stack[i]
-		if sel.tag != "" && sel.tag != el.Name.Local {
-			return false
-		}
-		if !attrMatch(sel.attrs, el.Attr) {
-			return false
-		}
-	}
-	return true
-}
-
-func xmlselect(w io.Writer, r io.Reader, sels []selector) {
-	dec := xml.NewDecoder(r)
-	var stack []xml.StartElement // stack of element names
+func main() {
+	// src := fetch("http://www.w3.org/TR/2006/REC-xml11-20060816")
+	// dec := getDec("examples/in.html")
+	dec := xml.NewDecoder(os.Stdin)
+	var stack []string            // stack of element names
+	var attrs []map[string]string // stack of element attributes
 	for {
 		tok, err := dec.Token()
 		if err == io.EOF {
@@ -187,25 +29,71 @@ func xmlselect(w io.Writer, r io.Reader, sels []selector) {
 		}
 		switch tok := tok.(type) {
 		case xml.StartElement:
-			stack = append(stack, tok) // push
+			stack = append(stack, tok.Name.Local) // push
+			attr := make(map[string]string)
+			for _, a := range tok.Attr {
+				attr[a.Name.Local] = a.Value // key point line
+			}
+			attrs = append(attrs, attr)
 		case xml.EndElement:
 			stack = stack[:len(stack)-1] // pop
+			attrs = attrs[:len(attrs)-1]
 		case xml.CharData:
-			if isSelected(stack, sels) {
-				fmt.Fprintf(w, "%s\n", tok)
+			if containsAll(toStringSlice(stack, attrs), os.Args[1:]) {
+				// if containsAll(toStringSlice(stack, attrs), []string{"div", "class=d1", "p", "id=p2"}) {
+				fmt.Printf("%s: %s\n", strings.Join(stack, " "), tok)
 			}
 		}
 	}
 }
 
-func main() {
-	if len(os.Args) < 2 {
-		os.Exit(0) // No selectors: nothing will be selected: nothing to do.
-	}
-	sels, err := parseSelectors(strings.Join(os.Args[2:], " "))
+func getDec(file string) *xml.Decoder {
+	f, err := ioutil.ReadFile(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		log.Fatal(err)
+	}
+	r := xml.NewDecoder(bytes.NewBuffer(f))
+	return r
+}
+
+// containsAll reports whether x contains the elements of y, in order.
+func containsAll(x, y []string) bool {
+	for len(y) <= len(x) {
+		if len(y) == 0 {
+			return true
+		}
+		if x[0] == y[0] {
+			y = y[1:]
+		}
+		x = x[1:]
+	}
+	return false
+}
+
+func fetch(url string) (rt []byte) {
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
 		os.Exit(1)
 	}
-	xmlselect(os.Stdout, os.Stdin, sels)
+	rt, err = ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
+		os.Exit(1)
+	}
+	// fmt.Printf("%s", b)
+	return
+}
+
+// toStringSlice converts an element's name or attribute into a slice of representation for selecting an element.
+func toStringSlice(stack []string, attrs []map[string]string) []string {
+	r := []string{}
+	for i := range stack {
+		r = append(r, stack[i])
+		for k, v := range attrs[i] {
+			r = append(r, k+"="+v)
+		}
+	}
+	return r
 }

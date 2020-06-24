@@ -1,65 +1,57 @@
 package main
 
 import (
-	"bytes"
-	"strings"
 	"testing"
 )
 
-func TestParseSelectors(t *testing.T) {
-	sels, err := parseSelectors(`a p [href="hi"][id=big] p[class="blue"] [class]`)
-	if err != nil {
-		t.Error(err)
-	}
-	expected := []string{
-		"a", "p", `[href="hi"][id="big"]`, `p[class="blue"]`, "[class]",
-	}
-	if len(expected) != len(sels) {
-		t.Errorf("%s != %s", sels, expected)
-		return
-	}
-	for i, ex := range expected {
-		actual := sels[i].String()
-		if actual != ex {
-			t.Errorf("%s != %s and %s != %s", actual, ex, sels, expected)
-			return
-		}
-	}
-}
-
-func TestSelectorParseFailure_badAttr(t *testing.T) {
-	sels, err := parseSelectors("a]")
-	if !strings.Contains(err.Error(), "want ident") {
-		t.Error(sels, err)
-	}
-}
-
-func TestSelectorParseFailure_badTag(t *testing.T) {
-	sels, err := parseSelectors(`a "p"`)
-	if !strings.Contains(err.Error(), "want ident") {
-		t.Error(sels, err)
-	}
-}
-
-func TestXMLSelect(t *testing.T) {
+func TestToStringSlice(t *testing.T) {
 	tests := []struct {
-		selectors, xml string
+		stack []string
+		attrs []map[string]string
+		want  []string
 	}{
-		{`a[id="3"] [id="4"]`, `<a id="3"><p id="4">good</p></a><a><p id="4">bad</p></a>`},
-		{`[id="3"] [id]`, `<a id="3"><p id="4">good</p></a><a><p id="4">bad</p></a>`},
-		{`[id="3"][class=big]`, `<a id="3" class="big">good</a><a id="3">bad</a>`},
+		{
+			[]string{},
+			[]map[string]string{},
+			[]string{},
+		},
+		{
+			[]string{},
+			[]map[string]string{map[string]string{}},
+			[]string{},
+		},
+		{
+			[]string{"div"},
+			[]map[string]string{map[string]string{}},
+			[]string{"div"},
+		},
+		{
+			[]string{"div"},
+			[]map[string]string{map[string]string{"id": "foo"}},
+			[]string{"div", "id=foo"},
+		},
+		{
+			[]string{"div", "span"},
+			[]map[string]string{map[string]string{"id": "foo"}, map[string]string{"class": "baz"}},
+			[]string{"div", "id=foo", "span", "class=baz"},
+		},
 	}
 	for _, test := range tests {
-		r := strings.NewReader(test.xml)
-		w := &bytes.Buffer{}
-		sels, err := parseSelectors(test.selectors)
-		if err != nil {
-			t.Error(test, err)
-			return
-		}
-		xmlselect(w, r, sels)
-		if w.String() != "good\n" {
-			t.Errorf("%s: %q != \"good\\n\"", test, w.String())
+		got := toStringSlice(test.stack, test.attrs)
+		if !equals(got, test.want) {
+			t.Errorf("toStringSlice(%v, %v) = %v, want %v", test.stack, test.attrs, got, test.want)
 		}
 	}
+}
+
+func equals(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
