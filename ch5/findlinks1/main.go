@@ -3,6 +3,7 @@
 // go build gopl.io/ch1/fetch
 // go build gopl.io/ch5/findlinks1
 // ./fetch https://golang.org | ./findlinks1
+// go run gopl.io/ch1/fetch http://gopl.io | go run main.go
 package main
 
 import (
