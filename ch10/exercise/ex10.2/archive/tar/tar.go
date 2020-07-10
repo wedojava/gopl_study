@@ -31,6 +31,8 @@ func list(f *os.File) ([]archive.FileHeader, error) {
 	return headers, nil
 }
 
+// archive.formats will append tar format after blank import tar
+// so, just a blank import make archive be able to recognized the file format after this init func.
 func init() {
 	archive.RegisterFormat("tar", "ustar\x0000", 257, list)
 }
