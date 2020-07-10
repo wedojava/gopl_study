@@ -1,3 +1,6 @@
+// go build gopl.io/ch3/mandelbrot
+// go build gopl.io/ch10/jpeg
+// ./mandelbrot | ./jpeg > mandlebrot.jpg
 package main
 
 import (
