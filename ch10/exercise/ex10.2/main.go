@@ -1,4 +1,6 @@
 // Generic archive file-reading function capable of reading ZIP files and tar files.
+// go run main.go examples/mandelbrot.zip
+// go run main.go examples/mandelbrot.tar
 package main
 
 import (
@@ -9,6 +11,8 @@ import (
 	"unicode/utf8"
 
 	"gopl.io/ch10/exercise/ex10.2/archive"
+	_ "gopl.io/ch10/exercise/ex10.2/archive/tar"
+	_ "gopl.io/ch10/exercise/ex10.2/archive/zip"
 )
 
 func main() {
