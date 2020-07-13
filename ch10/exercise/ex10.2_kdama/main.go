@@ -10,9 +10,9 @@ import (
 	"os"
 	"unicode/utf8"
 
-	"gopl.io/ch10/exercise/ex10.2/archive"
-	_ "gopl.io/ch10/exercise/ex10.2/archive/tar"
-	_ "gopl.io/ch10/exercise/ex10.2/archive/zip"
+	"gopl.io/ch10/exercise/ex10.2_kdama/archive"
+	_ "gopl.io/ch10/exercise/ex10.2_kdama/archive/tar"
+	_ "gopl.io/ch10/exercise/ex10.2_kdama/archive/zip"
 )
 
 func main() {

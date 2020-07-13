@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"gopl.io/ch10/exercise/ex10.2/archive"
+	"gopl.io/ch10/exercise/ex10.2_kdama/archive"
 )
 
 func list(f *os.File) ([]archive.FileHeader, error) {
