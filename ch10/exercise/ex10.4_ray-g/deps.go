@@ -87,8 +87,8 @@ func ancestors(packageNames []string) []string {
 	s := bufio.NewScanner(bytes.NewBuffer(out))
 	for s.Scan() {
 		fields := strings.Fields(s.Text())
-		pkg := fields[0]
-		deps := fields[1:]
+		pkg := fields[0]   // from {{.ImportPath}}
+		deps := fields[1:] // from {{join .Deps " "}}
 		for _, dep := range deps {
 			if targets[dep] {
 				pkgs = append(pkgs, pkg)
