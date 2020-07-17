@@ -15,6 +15,43 @@ func Serve(c Conn) {
 		if len(input) == 0 {
 			continue
 		}
+		command, args := input[0], input[1:]
+		log.Printf("<< %s %v %s", command, args, c.dataport.toAddress())
+		switch command {
+		case "CWD":
+			c.cwd(args)
+		case "EPSV":
+			c.epsv(args)
+		case "LIST":
+			c.list(args)
+		case "MODE":
+			c.mode(args)
+		case "NOOP":
+			c.noop(args)
+		case "PORT":
+			c.port(args)
+		case "PWD":
+			c.pwd(args)
+		case "RETR":
+			c.retr(args)
+		case "SIZE":
+			c.size(args)
+		case "STOR":
+			c.stor(args)
+		case "STRU":
+			c.stru(args)
+		case "SYST":
+			c.syst(args)
+		case "TYPE":
+			c.typeCommand(args)
+		case "USER":
+			c.user(args)
+		case "QUIT":
+			c.respond("221 Service closing control connection.")
+			return
+		default:
+			c.respond("502 Command not implemented.")
+		}
 	}
 }
 
