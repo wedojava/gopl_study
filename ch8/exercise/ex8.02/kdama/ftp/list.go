@@ -47,7 +47,6 @@ func (c *Conn) list(args []string) {
 				c.respond("426 Connection closed; transfer aborted.")
 				return
 			}
-
 		}
 		c.respond("226 Closing data connection. Requested file action successful.")
 		return
