@@ -29,8 +29,7 @@ func handleConn(c net.Conn) {
 
 func main() {
 	flag.Parse()
-	server := fmt.Sprintf("localhost:%d", port)
-	listener, err := net.Listen("tcp", server)
+	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
 	if err != nil {
 		log.Fatal(err)
 	}

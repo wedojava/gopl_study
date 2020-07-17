@@ -24,16 +24,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// Connect
 	for _, server := range servers {
 		conn, err := net.Dial("tcp", server.address)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer conn.Close()
-		go mustCopy(conn, server)
+		go mustCopy(server, conn)
 	}
-
+	// Show
 	for {
 		var data [][]string
 		for _, server := range servers {
@@ -49,7 +49,7 @@ func main() {
 }
 
 // mustCopy updates the value as the latest output of the server each time it reads the value from Reader.
-func mustCopy(src io.Reader, server *Server) {
+func mustCopy(server *Server, src io.Reader) {
 	sc := bufio.NewScanner(src)
 	for sc.Scan() {
 		server.output = sc.Text()
