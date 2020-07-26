@@ -1,6 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-<<<<<<< HEAD
-=======
 ### SublimeText template
 # Cache files for Sublime Text
 *.tmlanguage.cache
@@ -33,7 +31,6 @@ bh_unicode_properties.cache
 # https://packagecontrol.io/packages/sublime-github
 GitHub.sublime-settings
 
->>>>>>> d8960d97c722932f6128fc29cd0d33ef3da4eb17
 ### Go template
 # Binaries for programs and plugins
 *.exe
@@ -50,10 +47,9 @@ GitHub.sublime-settings
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-<<<<<<< HEAD
 .idea/
 .DS_Store/
-=======
+.DS_Store
 
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
@@ -128,4 +124,3 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
->>>>>>> d8960d97c722932f6128fc29cd0d33ef3da4eb17
