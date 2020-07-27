@@ -15,8 +15,9 @@ func Serve(c *Conn) {
 		if len(input) == 0 {
 			continue
 		}
-		command, args := input[0], input[1]
-		log.Printf("<< %s %v", command, args)
+		command, args := input[0], input[1:]
+		// log.Printf("<< %s %v", command, args)
+		log.Printf("<< %s %v %s", command, args, c.dataPort.toAddress())
 
 		switch command {
 		case "CWD": // cd
