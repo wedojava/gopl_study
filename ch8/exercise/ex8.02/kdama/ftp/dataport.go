@@ -21,7 +21,7 @@ func dataportFromAddress(hostport string) (*dataport, error) {
 
 func dataportFromHostport(address string) (*dataport, error) {
 	var h1, h2, h3, h4, p1, p2 int
-	_, err := fmt.Sscanf(address, "%d,%d,%d,%d,%d", &h1, &h2, &h3, &h4, &p1, &p2)
+	_, err := fmt.Sscanf(address, "%d,%d,%d,%d,%d,%d", &h1, &h2, &h3, &h4, &p1, &p2)
 	if err != nil {
 		return nil, err
 	}
