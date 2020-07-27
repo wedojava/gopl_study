@@ -7,7 +7,7 @@ import (
 	"net"
 	"path/filepath"
 
-	"gopl.io/ch8/exercise/ex8.02/kdama/ftp"
+	"gopl.io/ch8/exercise/ex8.02/myftp/ftp"
 )
 
 var (
