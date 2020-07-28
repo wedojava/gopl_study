@@ -23,7 +23,7 @@ func init() {
 
 func main() {
 	server := fmt.Sprintf(":%d", port)
-	listener, err := net.Listen("tcp", server)
+	listener, err := net.Listen("tcp4", server)
 	if err != nil {
 		log.Fatal(err)
 	}
