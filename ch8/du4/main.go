@@ -12,6 +12,17 @@ import (
 
 var verbose = flag.Bool("v", false, "show verbose progress message")
 
+var done = make(chan struct{})
+
+func cancelled() bool {
+	select {
+	case <-done:
+		return true
+	default:
+		return false
+	}
+}
+
 func main() {
 	// Determine the initial directories.
 	flag.Parse()
@@ -19,6 +30,11 @@ func main() {
 	if len(roots) == 0 {
 		roots = []string{"."}
 	}
+	// Cancel travelsal when input is detected.
+	go func() {
+		os.Stdin.Read(make([]byte, 1)) // read a single byte
+		close(done)
+	}()
 	// Traverse each root of the file tree in parallel.
 	fileSizes := make(chan int64)
 	var n sync.WaitGroup
@@ -56,30 +72,16 @@ loop:
 		}
 	}
 
-	printDiskUsage(nfiles, nbytes)
+	printDiskUsage(nfiles, nbytes) // final totals
 }
 
 func printDiskUsage(nfiles, nbytes int64) {
 	fmt.Printf("%d files %.1f GB\n", nfiles, float64(nbytes)/1e9)
 }
 
-var done = make(chan struct{})
-
-func cancelled() bool {
-	select {
-	case <-done:
-		return true
-	default:
-		return false
-	}
-}
-
+// walkDir recursively walks the file tree rooted at dir
+// and sends the size of each found file on fileSizes.
 func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
-	// Cancel travelsal when input is detected.
-	go func() {
-		os.Stdin.Read(make([]byte, 1)) // read a single byte
-		close(done)
-	}()
 	defer n.Done()
 	if cancelled() {
 		return
@@ -103,13 +105,19 @@ func dirents(dir string) []os.FileInfo {
 	case <-done:
 		return nil // cancelled
 	}
-
 	defer func() { <-sema }() // release token
 
-	entries, err := ioutil.ReadDir(dir)
+	f, err := os.Open(dir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "du1: %v\n", err)
+		fmt.Fprintf(os.Stderr, "du: %v\n", err)
 		return nil
+	}
+	defer f.Close()
+
+	entries, err := ioutil.ReadDir(0) // => no limit; read all entries
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "du: %v\n", err)
+		// Don't return: Readdir may return partial results.
 	}
 	return entries
 }
