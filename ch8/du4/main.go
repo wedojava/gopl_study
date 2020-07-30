@@ -107,17 +107,23 @@ func dirents(dir string) []os.FileInfo {
 	}
 	defer func() { <-sema }() // release token
 
-	f, err := os.Open(dir)
+	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "du: %v\n", err)
 		return nil
 	}
-	defer f.Close()
 
-	entries, err := ioutil.ReadDir(0) // => no limit; read all entries
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "du: %v\n", err)
-		// Don't return: Readdir may return partial results.
-	}
+	// f, err := os.Open(dir)
+	// if err != nil {
+	//         fmt.Fprintf(os.Stderr, "du: %v\n", err)
+	//         return nil
+	// }
+	// defer f.Close()
+	//
+	// entries, err := f.Readdir(0) // => no limit; read all entries
+	// if err != nil {
+	//         fmt.Fprintf(os.Stderr, "du: %v\n", err)
+	//         // Don't return: Readdir may return partial results.
+	// }
 	return entries
 }

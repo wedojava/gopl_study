@@ -14,9 +14,10 @@ var tokens = make(chan struct{}, 20)
 
 func crawl(url string) []string {
 	fmt.Println(url)
+	// tokens will block while len equal 20
 	tokens <- struct{}{} //acquire a token
 	list, err := links.Extract(url)
-	<-tokens
+	<-tokens // relese the tokens so it's len < 20, process continue
 	if err != nil {
 		log.Print(err)
 	}

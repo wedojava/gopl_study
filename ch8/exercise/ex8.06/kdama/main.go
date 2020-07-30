@@ -24,6 +24,8 @@ func init() {
 	args = flag.Args()
 }
 
+// tokens is a counting semephore used to
+// enforce a limit of 20 concurrent requests.
 var tokens = make(chan struct{}, 20)
 
 func crawl(work Work) []Work {
@@ -33,7 +35,7 @@ func crawl(work Work) []Work {
 	if work.depth >= maxdepth {
 		return nil
 	}
-	// TODO: What's the means below?
+	// tokens will block the process while len equal 20
 	tokens <- struct{}{} // acquire a token
 	list, err := links.Extract(work.url)
 	<-tokens // release the token
@@ -73,9 +75,7 @@ func main() {
 				go func(link Work) {
 					worklist <- crawl(link)
 				}(link)
-
 			}
 		}
 	}
-
 }
