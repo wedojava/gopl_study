@@ -52,8 +52,8 @@ func main() {
 	}()
 	// Print the results periodically.
 	var tick <-chan time.Time
-	if *verbose {
-		tick = time.Tick(500 * time.Millisecond)
+	if *verbose { // if args contains "-v", *verbose is true
+		tick = time.Tick(500 * time.Millisecond) // tick assign time <-chan
 	}
 	var nfiles, nbytes int64
 loop:
@@ -61,7 +61,7 @@ loop:
 		select {
 		case size, ok := <-fileSizes:
 			if !ok {
-				break loop // fileSizes was closed
+				break loop // fileSizes was closed after roots traversed done.
 			}
 			nfiles++
 			nbytes += size
