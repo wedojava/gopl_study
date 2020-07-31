@@ -1,3 +1,4 @@
+// go run mirror.go http://gopl.io
 package main
 
 import (
@@ -58,7 +59,7 @@ func forEachNode(n *html.Node, pre, post func(n *html.Node)) {
 		pre(n)
 	}
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		forEachNode(n, pre, post)
+		forEachNode(c, pre, post)
 	}
 	if post != nil {
 		post(n)
@@ -138,7 +139,6 @@ func visit(rawurl string) (urls []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("u.Host = ", u.Host)
 	if base.Host != u.Host {
 		log.Printf("not saving %s: non-local", rawurl)
 		return nil, nil
