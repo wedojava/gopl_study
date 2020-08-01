@@ -63,6 +63,7 @@ loop:
 			for range rootSizes {
 				// Do Nothing
 			}
+			fmt.Println("Cannelled!")
 			return
 		case rs, ok := <-rootSizes:
 			if !ok {

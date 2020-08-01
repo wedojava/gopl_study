@@ -1,3 +1,5 @@
+// go run du.go -v $HOME /usr /bin /etc
+// go run du.go $HOME /usr /bin /etc
 package main
 
 import (
@@ -23,6 +25,11 @@ func cancelled() bool {
 	}
 }
 
+type RootSize struct {
+	index int
+	size  int64
+}
+
 func main() {
 	// Determine the initial directories.
 	flag.Parse()
@@ -36,52 +43,56 @@ func main() {
 		close(done)
 	}()
 	// Traverse each root of the file tree in parallel.
-	fileSizes := make(chan int64)
+	rootSizes := make(chan RootSize)
 	var n sync.WaitGroup
-	for _, root := range roots {
+	for i, root := range roots {
 		n.Add(1)
-		go walkDir(root, &n, fileSizes)
+		go walkDir(root, &n, i, rootSizes)
 	}
 	go func() {
 		n.Wait()
-		close(fileSizes)
+		close(rootSizes)
 	}()
 	// Print the results periodically.
 	var tick <-chan time.Time
 	if *verbose {
 		tick = time.Tick(500 * time.Millisecond)
 	}
-	var nfiles, nbytes int64
+	nfiles := make([]int64, len(roots))
+	nbytes := make([]int64, len(roots))
 loop:
 	for {
 		select {
 		case <-done:
 			// Drain fileSizes to allow existing goroutines to finish.
-			for range fileSizes {
+			for range rootSizes {
 				// Do nothing.
 			}
+			fmt.Println("Cancelled!")
 			return
-		case size, ok := <-fileSizes:
+		case rs, ok := <-rootSizes:
 			if !ok {
 				break loop
 			}
-			nfiles++
-			nbytes += size
+			nfiles[rs.index]++
+			nbytes[rs.index] += rs.size
 		case <-tick:
-			printDiskUsage(nfiles, nbytes)
+			printDiskUsage(roots, nfiles, nbytes)
 		}
 	}
 
-	printDiskUsage(nfiles, nbytes) // final totals
+	printDiskUsage(roots, nfiles, nbytes) // final totals
 }
 
-func printDiskUsage(nfiles, nbytes int64) {
-	fmt.Printf("%d files %.1f GB\n", nfiles, float64(nbytes)/1e9)
+func printDiskUsage(roots []string, nfiles, nbytes []int64) {
+	for i, r := range roots {
+		fmt.Printf("%d files %.1f GB under %s\n", nfiles[i], float64(nbytes[i])/1e9, r)
+	}
 }
 
 // walkDir recursively walks the file tree rooted at dir
 // and sends the size of each found file on fileSizes.
-func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
+func walkDir(dir string, n *sync.WaitGroup, index int, rootSizes chan<- RootSize) {
 	defer n.Done()
 	if cancelled() {
 		return
@@ -90,9 +101,9 @@ func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
 		if entry.IsDir() {
 			n.Add(1)
 			subdir := filepath.Join(dir, entry.Name())
-			go walkDir(subdir, n, fileSizes)
+			go walkDir(subdir, n, index, rootSizes)
 		} else {
-			fileSizes <- entry.Size()
+			rootSizes <- RootSize{index: index, size: entry.Size()}
 		}
 	}
 }
@@ -112,18 +123,5 @@ func dirents(dir string) []os.FileInfo {
 		fmt.Fprintf(os.Stderr, "du: %v\n", err)
 		return nil
 	}
-
-	// f, err := os.Open(dir)
-	// if err != nil {
-	//         fmt.Fprintf(os.Stderr, "du: %v\n", err)
-	//         return nil
-	// }
-	// defer f.Close()
-	//
-	// entries, err := f.Readdir(0) // => no limit; read all entries
-	// if err != nil {
-	//         fmt.Fprintf(os.Stderr, "du: %v\n", err)
-	//         // Don't return: Readdir may return partial results.
-	// }
 	return entries
 }
