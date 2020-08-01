@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 )
 
 type RootSize struct {
@@ -53,7 +52,7 @@ func main() {
 	}()
 
 	// Print the results periodically.
-	tick := time.Tick(500 * time.Millisecond)
+	// tick := time.Tick(500 * time.Millisecond)
 	nfiles := make([]int64, len(roots))
 	nbytes := make([]int64, len(roots))
 loop:
@@ -71,8 +70,8 @@ loop:
 			}
 			nfiles[rs.root]++
 			nbytes[rs.root] += rs.size
-		case <-tick:
-			printDiskUsage(roots, nfiles, nbytes)
+			// case <-tick:
+			//         printDiskUsage(roots, nfiles, nbytes)
 		}
 	}
 	printDiskUsage(roots, nfiles, nbytes)
