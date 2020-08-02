@@ -42,6 +42,8 @@ func fetch(url string, cancel <-chan struct{}) response {
 	}
 
 	// Set channel for cancel request.
+	// Cancel is an optional channel whose closure indicates that the client
+	// request should be regarded as canceled.
 	req.Cancel = cancel
 
 	resp, err := http.DefaultClient.Do(req)
