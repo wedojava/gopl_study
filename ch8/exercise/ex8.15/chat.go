@@ -32,7 +32,10 @@ func broadcaster() {
 			// clients' outgoing message channels.
 			// Broadcasts the message to every connected client.
 			for cli := range clients {
-				cli.Out <- msg
+				select {
+				case cli.Out <- msg:
+				default:
+				}
 			}
 		// The broadcaster listens on the global entering
 		// and leaving channels for announcements of
@@ -53,7 +56,7 @@ func broadcaster() {
 
 func handleConn(conn net.Conn) {
 	defer conn.Close()
-	out := make(chan string) // outgoing client messages
+	out := make(chan string, 20) // outgoing client messages
 	go clientWriter(conn, out)
 	in := make(chan string) // incoming client messages
 	go clientReader(conn, in)
