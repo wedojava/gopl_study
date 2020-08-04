@@ -10,7 +10,7 @@ func TestBank(t *testing.T) {
 	// Alice
 	go func() {
 		Deposit(200)
-		WithdrawIt(200)
+		Withdraw(200)
 		fmt.Println("=", Balance())
 		done <- struct{}{}
 	}()
@@ -18,13 +18,13 @@ func TestBank(t *testing.T) {
 	// Bob
 	go func() {
 		Deposit(50)
-		WithdrawIt(50)
+		Withdraw(50)
 		Deposit(100)
 		fmt.Println("=", Balance())
 		done <- struct{}{}
 	}()
 
-	// Wait for both transactions
+	// Wait for both transactions.
 	<-done
 	<-done
 
@@ -35,7 +35,7 @@ func TestBank(t *testing.T) {
 
 func TestWithdrawal(t *testing.T) {
 	b1 := Balance()
-	ok := WithdrawIt(50)
+	ok := Withdraw(50)
 	if !ok {
 		t.Errorf("!ok. balance: %d", Balance())
 	}
@@ -47,7 +47,7 @@ func TestWithdrawal(t *testing.T) {
 
 func TestWithdrawalInsufficient(t *testing.T) {
 	b1 := Balance()
-	ok := WithdrawIt(b1 + 1) // there must be false, else balance here is wrong, and go continue in teller()
+	ok := Withdraw(b1 + 1)
 	b2 := Balance()
 	if ok {
 		t.Errorf("!ok. balance: %d", b2)
