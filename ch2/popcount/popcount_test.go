@@ -1,4 +1,15 @@
-package popcount
+package popcount_test
+
+import (
+	"fmt"
+	"testing"
+
+	"gopl.io/ch2/popcount"
+)
+
+func TestPopCount(t *testing.T) {
+	fmt.Println(popcount.PopCount(0x1234567890ABCDEF))
+}
 
 // -- Alternative implementations --
 func BitCount(x uint64) int {
@@ -11,3 +22,59 @@ func BitCount(x uint64) int {
 	x = x + (x >> 32)
 	return int(x & 0x7f)
 }
+
+func PopCountByClearing(x uint64) int {
+	n := 0
+	for x != 0 {
+		x = x & (x - 1) // clear rightmost non-zero bit
+		n++
+	}
+	return n
+}
+
+func PopCountByShifting(x uint64) int {
+	n := 0
+	for i := uint(0); i < 64; i++ {
+		if x&(1<<i) != 0 {
+			n++
+		}
+	}
+	return n
+}
+
+// -- Benchmarks --
+func BenchmarkPopCount(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		popcount.PopCount(0x1234567890ABCDEF)
+	}
+}
+
+func BenchmarkBitCount(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BitCount(0x1234567890ABCDEF)
+	}
+}
+
+func BenchmarkPopCountByClearing(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		PopCountByClearing(0x1234567890ABCDEF)
+	}
+}
+
+func BenchmarkPopCountByShifting(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		PopCountByShifting(0x1234567890ABCDEF)
+	}
+}
+
+// go version go1.14.5 linux/amd64
+// $ go test -cpu=4 -bench=. gopl.io/ch2/popcount
+// goos: linux
+// goarch: amd64
+// pkg: gopl.io/ch2/popcount
+// BenchmarkPopCount-4             	1000000000	         0.234 ns/op
+// BenchmarkBitCount-4             	1000000000	         0.234 ns/op
+// BenchmarkPopCountByClearing-4   	54000216	        22.0 ns/op
+// BenchmarkPopCountByShifting-4   	27343759	        43.1 ns/op
+// PASS
+// ok  	gopl.io/ch2/popcount	2.959s
