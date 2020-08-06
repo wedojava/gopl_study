@@ -46,7 +46,7 @@ func (memo *Memo) Get(key string) (value interface{}, err error) {
 		e.res.value, e.res.err = memo.f(key)
 
 		close(e.ready) // broadcast ready condition
-	} else {
+	} else { // TODO: understand how this condition works.
 		// This is a repeat request for this key.
 		memo.mu.Unlock()
 
