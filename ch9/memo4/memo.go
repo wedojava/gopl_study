@@ -39,18 +39,24 @@ func (memo *Memo) Get(key string) (value interface{}, err error) {
 		// This is first request for this key.
 		// This goroutine becomes reponsible for computing
 		// the value and broadcasting the ready condition.
-		e = &entry{ready: make(chan struct{})}
-		memo.cache[key] = e
+		e = &entry{ready: make(chan struct{})} // init e
+		memo.cache[key] = e                    // init cache
 		memo.mu.Unlock()
 
-		e.res.value, e.res.err = memo.f(key)
+		e.res.value, e.res.err = memo.f(key) // assign value and err to e
 
 		close(e.ready) // broadcast ready condition
-	} else { // TODO: understand how this condition works.
+	} else {
 		// This is a repeat request for this key.
 		memo.mu.Unlock()
 
 		<-e.ready // wait for ready condition
+		// if it is not ready, block here wait other goroutine get and fill &entry,
+		// &entry filled means e filled, means memo.cache[key] filled.
+		// and e.ready closed. so <-e.ready always recive 0, all e.ready blocks passed.
+		// ifelse completed, e.res returned.
 	}
 	return e.res.value, e.res.err
 }
+
+// Our concurrent, duplicate-suppressing, non-blocking cache is complete.
