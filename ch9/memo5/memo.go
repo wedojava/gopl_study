@@ -25,6 +25,8 @@ type request struct {
 	response chan<- result // the client wants a single result
 }
 
+// Memo type consists of a channel, requests, through which the caller of Get
+// communicates  with the monitor goroutine.
 type Memo struct{ requests chan request }
 
 func New(f Func) *Memo {
@@ -34,6 +36,8 @@ func New(f Func) *Memo {
 }
 
 // Get is concurrency-safe!
+// Create a response channel, puts it in the request, sends it to the monitor goroutine
+// then immediately receives from it
 func (memo *Memo) Get(key string) (value interface{}, err error) {
 	response := make(chan result)
 	memo.requests <- request{key, response}
@@ -44,10 +48,12 @@ func (memo *Memo) Get(key string) (value interface{}, err error) {
 func (memo *Memo) Close() { close(memo.requests) }
 
 func (memo *Memo) server(f Func) {
+	// cache is confined to this monitor goroutine: (*Memo).server
 	cache := make(map[string]*entry)
+	// Read requests until the request channel is closed by the Close method.
 	for req := range memo.requests {
-		e := cache[req.key]
-		if e == nil {
+		e := cache[req.key] // consult the cache
+		if e == nil {       // create and insert new entry
 			// This is the first request for this key.
 			e = &entry{ready: make(chan struct{})}
 			cache[req.key] = e
@@ -70,5 +76,3 @@ func (e *entry) deliver(response chan<- result) {
 	// Send the result to the client.
 	response <- e.res
 }
-
-// Our concurrent, duplicate-suppressing, non-blocking cache is complete.
