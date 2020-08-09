@@ -57,19 +57,26 @@ func (memo *Memo) server(f Func) {
 			// This is the first request for this key.
 			e = &entry{ready: make(chan struct{})}
 			cache[req.key] = e
+			// the first request for a given key becomes
+			// responsible for calling the function f on that key
 			go e.call(f, req.key) // call f(key)
 		}
+		// The call and deliver methods must be called in their own goroutines
+		// to ensure that the monitor goroutine does not stop processing new requests.
 		go e.deliver(req.response)
 	}
 }
 
 func (e *entry) call(f Func, key string) {
 	// Evaluate the function.
-	e.res.value, e.res.err = f(key)
+	e.res.value, e.res.err = f(key) // storing the result in the entry
 	// Broadcast the ready condition.
-	close(e.ready)
+	close(e.ready) // broadcasting the readiness of the entry by closing the ready channel.
 }
 
+// A subsequent request for the same key finds the existing entry in the map,
+// waits for the result to become ready,
+// and sends the result through the response channel to the client goroutine that called Get.
 func (e *entry) deliver(response chan<- result) {
 	// Wait for the ready condition.
 	<-e.ready
