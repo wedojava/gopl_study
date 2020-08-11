@@ -37,11 +37,17 @@ func New(f Func) *Memo {
 }
 
 // Get is concurrency-safe!
-// Create a response channel, puts it in the request, sends it to the monitor goroutine
-// then immediately receives from it
+// key is to the memoized function
 func (memo *Memo) Get(key string) (value interface{}, err error) {
 	response := make(chan result)
+	// Create a response channel, puts it in the request
+	// sends the monitor goroutine both the key and the channel response
 	memo.requests <- request{key, response}
+	// then immediately receives from it
+	// response, over which the result should be
+	// sent back when it becomes available.
+	// This channel will carry only a single value.
+	// The single value is cached value
 	res := <-response
 	return res.value, res.err
 }
