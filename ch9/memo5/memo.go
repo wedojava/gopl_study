@@ -29,6 +29,7 @@ type request struct {
 // communicates  with the monitor goroutine.
 type Memo struct{ requests chan request }
 
+// after New memo got all result
 func New(f Func) *Memo {
 	memo := &Memo{requests: make(chan request)}
 	go memo.server(f)
@@ -60,6 +61,8 @@ func (memo *Memo) server(f Func) {
 			// the first request for a given key becomes
 			// responsible for calling the function f on that key
 			go e.call(f, req.key) // call f(key)
+			// e got result from f(key) and ready channel closed,
+			// block disappeared, result can be deliveried.
 		}
 		// The call and deliver methods must be called in their own goroutines
 		// to ensure that the monitor goroutine does not stop processing new requests.
