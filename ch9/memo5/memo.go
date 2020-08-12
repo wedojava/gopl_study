@@ -26,7 +26,7 @@ type request struct {
 }
 
 // Memo type consists of a channel, requests, through which the caller of Get
-// communicates  with the monitor goroutine.
+// communicates  with the monitor goroutine: (*Memo).server.
 type Memo struct{ requests chan request }
 
 // after New memo got all result
@@ -49,7 +49,7 @@ func (memo *Memo) Get(key string) (value interface{}, err error) {
 func (memo *Memo) Close() { close(memo.requests) }
 
 func (memo *Memo) server(f Func) {
-	// cache is confined to this monitor goroutine: (*Memo).server
+	// cache is confined to this monitor goroutine
 	cache := make(map[string]*entry)
 	// Read requests until the request channel is closed by the Close method.
 	for req := range memo.requests {
