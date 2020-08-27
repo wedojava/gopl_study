@@ -8,6 +8,7 @@ func TestIsPalindrome(t *testing.T) {
 		want  bool
 	}{
 		{"", true},
+		{"的地的", true},
 		{"a", true},
 		{"aa", true},
 		{"ab", false},
