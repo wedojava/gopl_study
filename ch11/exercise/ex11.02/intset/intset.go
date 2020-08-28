@@ -68,7 +68,14 @@ func (s *BitIntSet) Len() int {
 
 func (s *BitIntSet) Remove(x int) {
 	word, bit := x/64, uint(x%64)
-	s.words[word] &^= 1 << bit // ?
+	s.words[word] &^= 1 << bit // AND NOT
+	// s.words[word]^(s.words[word] & 1<<bit) // AND first then XOR
+	// The &^ operator is bit clear (AND NOT):
+	// z = x &^ y, each bit of z is 0 if the corresponding bit of y is 1; otherwise it equals the corresponding bit of x.
+	// x=00100010
+	// y=00000110
+	// z=x&y=00000010
+	// x^z=00100010^00000010=00100000
 }
 
 func (s *BitIntSet) Clear() {
@@ -112,7 +119,9 @@ func (s *BitIntSet) Ints() []int {
 			continue
 		}
 		for j := 0; j < 64; j++ {
-			if word&(1<<uint(j)) != 0 { // ?
+			// 左移j位和word与运算，是1说明这个位置上word的值是1
+			if word&(1<<uint(j)) != 0 {
+				// 64*i+j: 64*1+3 = 67: 67/64 = 1 余 3
 				ints = append(ints, 64*i+j)
 			}
 		}

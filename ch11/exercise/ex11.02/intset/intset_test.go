@@ -29,9 +29,9 @@ func TestLenAfterAddingElements(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 	for _, s := range newIntSets() {
-		s.Add(0)
-		s.Remove(0)
-		if s.Has(0) {
+		s.Add(11)
+		s.Remove(11)
+		if s.Has(11) {
 			t.Errorf("%T: want zero removed, got %s", s, s)
 		}
 	}
@@ -74,6 +74,17 @@ func TestInts(t *testing.T) {
 		got := s.Ints()
 		want := []int{133, 2, 4}
 		if reflect.DeepEqual(got, want) {
+			t.Errorf("\nwant: %v\ngot: %v", want, got)
+		}
+	}
+}
+
+func TestString(t *testing.T) {
+	for _, s := range newIntSets() {
+		s.AddAll(133, 2, 4)
+		got := s.String()
+		want := "{2 4 133}"
+		if got != want {
 			t.Errorf("\nwant: %v\ngot: %v", want, got)
 		}
 	}
