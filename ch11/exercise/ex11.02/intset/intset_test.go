@@ -1,45 +1,66 @@
 package intset
 
-import (
-	"fmt"
-)
+import "testing"
 
-func Example_one() {
-	var x, y IntSet
-	x.Add(1)
-	x.Add(144)
-	x.Add(9)
-	fmt.Println(x.String()) // {1 9 144}
-
-	y.Add(9)
-	y.Add(42)
-	fmt.Println(y.String()) // {9 42}
-
-	x.UnionWith(&y)
-	fmt.Println(x.String()) // {1 9 42 144}
-
-	fmt.Println(x.Has(9), x.Has(123)) // true false
-	// Output:
-	// {1 9 144}
-	// {9 42}
-	// {1 9 42 144}
-	// true false
+func newIntSets() []IntSet {
+	return []IntSet{&BitIntSet{}, NewMapIntSet()}
 }
 
-func Example_two() {
-	var x IntSet
-	x.Add(1)
-	x.Add(144)
-	x.Add(9)
-	x.Add(42)
+func TestLenZeroInitially(t *testing.T) {
+	for _, s := range newIntSets() {
+		if s.Len() != 0 {
+			t.Errorf("%T.Len(): got %d, want 0", s, s.Len())
+		}
+	}
+}
 
-	//!+note
-	fmt.Println(&x)         // {1 9 42 144}
-	fmt.Println(x.String()) // {1 9 42 144}
-	fmt.Println(x)          // {[4398046511618 0 65536]}
-	//!-note
-	// Output:
-	// {1 9 42 144}
-	// {1 9 42 144}
-	// {[4398046511618 0 65536]}
+func TestLenAfterAddingElements(t *testing.T) {
+	for _, s := range newIntSets() {
+		s.Add(0)
+		s.Add(2000)
+		if s.Len() != 2 {
+			t.Errorf("%T.Len(): got %d, want 2", s, s.Len())
+		}
+	}
+}
+
+func TestRemove(t *testing.T) {
+	for _, s := range newIntSets() {
+		s.Add(0)
+		s.Remove(0)
+		if s.Has(0) {
+			t.Errorf("%T: want zero removed, got %s", s, s)
+		}
+	}
+}
+
+func TestClear(t *testing.T) {
+	for _, s := range newIntSets() {
+		s.Add(0)
+		s.Add(1000)
+		s.Clear()
+		if s.Has(0) || s.Has(1000) {
+			t.Errorf("%T: want empty set, got %s", s, s)
+		}
+	}
+}
+
+func TestCopy(t *testing.T) {
+	for _, orig := range newIntSets() {
+		orig.Add(1)
+		copy := orig.Copy()
+		copy.Add(2)
+		if !copy.Has(1) || orig.Has(2) {
+			t.Errorf("%T: want %s, got %s", orig, orig, copy)
+		}
+	}
+}
+
+func TestAddAll(t *testing.T) {
+	for _, s := range newIntSets() {
+		s.AddAll(0, 2, 4)
+		if !s.Has(0) || !s.Has(2) || !s.Has(4) {
+			t.Errorf("%T: want {2, 4}, got %s", s, s)
+		}
+	}
 }
