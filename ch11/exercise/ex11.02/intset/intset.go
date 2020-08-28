@@ -26,7 +26,7 @@ func (s *BitIntSet) Add(x int) {
 	s.words[word] |= 1 << bit // ?
 }
 
-func (s BitIntSet) AddAll(nums ...int) {
+func (s *BitIntSet) AddAll(nums ...int) {
 	for _, n := range nums {
 		s.Add(n)
 	}
