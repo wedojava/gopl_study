@@ -1,6 +1,9 @@
 package intset
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func newIntSets() []IntSet {
 	return []IntSet{&BitIntSet{}, NewMapIntSet()}
@@ -58,9 +61,20 @@ func TestCopy(t *testing.T) {
 
 func TestAddAll(t *testing.T) {
 	for _, s := range newIntSets() {
-		s.AddAll(130, 2, 4)
-		if !s.Has(130) || !s.Has(2) || !s.Has(4) {
+		s.AddAll(133, 2, 4)
+		if !s.Has(133) || !s.Has(2) || !s.Has(4) {
 			t.Errorf("%T: want {2, 4}, got %s", s, s)
+		}
+	}
+}
+
+func TestInts(t *testing.T) {
+	for _, s := range newIntSets() {
+		s.AddAll(133, 2, 4)
+		got := s.Ints()
+		want := []int{133, 2, 4}
+		if reflect.DeepEqual(got, want) {
+			t.Errorf("\nwant: %v\ngot: %v", want, got)
 		}
 	}
 }
