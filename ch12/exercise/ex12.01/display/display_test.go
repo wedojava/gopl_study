@@ -10,6 +10,41 @@ import (
 	"gopl.io/ch7/eval"
 )
 
+func TestMapKeys(t *testing.T) {
+	s := map[struct{ x int }]int{
+		{1}: 11,
+		{2}: 22,
+	}
+	Display("s", s)
+	// Output:
+
+	// new func added before:
+	// Display s (map[struct { x int }]int):
+	// s[struct { x int }value] = 11
+	// s[struct { x int }value] = 22
+
+	// formatKeys added:
+	// s[{x: 2}] = 22
+	// s[{x: 1}] = 11
+
+	// map key cannot be the type of slice
+	a := map[[3]int]int{
+		{1, 2, 3}: 123,
+		{2, 3, 4}: 234,
+	}
+	Display("a", a)
+	// Output:
+
+	// formatKeys add before
+	// a[[3]intvalue] = 234
+	// a[[3]intvalue] = 123
+
+	// formatKeys added
+	// Display a (map[[3]int]int):
+	// a[2, 3, 4] = 234
+	// a[1, 2, 3] = 123
+}
+
 func Example_expr() {
 	e, _ := eval.Parse("sqrt(A/pi)")
 	Display("e", e)
