@@ -42,6 +42,10 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 	case reflect.Struct: // ((name value) ...)
 		buf.WriteByte('(')
 		for i := 0; i < v.NumField(); i++ {
+			zero := reflect.Zero(v.Field(i).Type()).Interface()
+			if reflect.DeepEqual(v.Field(i).Interface(), zero) {
+				continue
+			}
 			if i > 0 {
 				buf.WriteByte(' ')
 			}
@@ -79,6 +83,14 @@ func encode(buf *bytes.Buffer, v reflect.Value) error {
 		fmt.Fprintf(buf, "%4.4f", v.Float())
 	case reflect.Complex64, reflect.Complex128:
 		fmt.Fprintf(buf, "#C(%4.4f %4.4f)", real(v.Complex()), imag(v.Complex()))
+	case reflect.Interface:
+		if v.IsNil() {
+			fmt.Fprintf(buf, "nil")
+		} else {
+			var b bytes.Buffer
+			encode(&b, v.Elem())
+			fmt.Fprintf(buf, "%q %s", v.Elem().Type(), b.String())
+		}
 	default: // float, complex, bool, chan, func, interface
 		return fmt.Errorf("unsupported type: %s", v.Type())
 	}
