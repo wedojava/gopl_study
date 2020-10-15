@@ -42,19 +42,19 @@ func main() {
 
 /*
 //!+output
-$ go build gopl.io/ch12/search
-$ ./search &
-$ ./fetch 'http://localhost:12345/search'
+$ go run gopl.io/ch12/search &
+$ go run gopl.io/ch1/fetch 'http://localhost:12345/search'
 Search: {Labels:[] MaxResults:10 Exact:false}
-$ ./fetch 'http://localhost:12345/search?l=golang&l=programming'
+$ go run gopl.io/ch1/fetch 'http://localhost:12345/search?l=golang&l=programming'
 Search: {Labels:[golang programming] MaxResults:10 Exact:false}
-$ ./fetch 'http://localhost:12345/search?l=golang&l=programming&max=100'
+$ go run gopl.io/ch1/fetch 'http://localhost:12345/search?l=golang&l=programming&max=100'
 Search: {Labels:[golang programming] MaxResults:100 Exact:false}
-$ ./fetch 'http://localhost:12345/search?x=true&l=golang&l=programming'
+$ go run gopl.io/ch1/fetch 'http://localhost:12345/search?x=true&l=golang&l=programming'
 Search: {Labels:[golang programming] MaxResults:10 Exact:true}
-$ ./fetch 'http://localhost:12345/search?q=hello&x=123'
+$ go run gopl.io/ch1/fetch 'http://localhost:12345/search?q=hello&x=123'
 x: strconv.ParseBool: parsing "123": invalid syntax
-$ ./fetch 'http://localhost:12345/search?q=hello&max=lots'
+$ go run gopl.io/ch1/fetch 'http://localhost:12345/search?q=hello&max=lots'
 max: strconv.ParseInt: parsing "lots": invalid syntax
+$ pkill search
 //!-output
 */
