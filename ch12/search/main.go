@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 
+	"gopl.io/ch12/exercise/ex12.02/display"
 	"gopl.io/ch12/params"
 )
 
@@ -31,6 +32,7 @@ func search(resp http.ResponseWriter, req *http.Request) {
 
 	// ...rest of handler...
 	fmt.Fprintf(resp, "Search: %+v\n", data)
+	display.Display("resp", resp)
 }
 
 //!-
