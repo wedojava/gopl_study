@@ -82,8 +82,13 @@ func read(lex *lexer, v reflect.Value) {
 	case scanner.Ident:
 		// The only valid identifiers are
 		// "nil" and struct field names.
-		if lex.text() == "nil" {
+		switch lex.text() {
+		case "nil":
 			v.Set(reflect.Zero(v.Type()))
+			lex.next()
+			return
+		case "t":
+			v.SetBool(true)
 			lex.next()
 			return
 		}
@@ -94,7 +99,23 @@ func read(lex *lexer, v reflect.Value) {
 		return
 	case scanner.Int:
 		i, _ := strconv.Atoi(lex.text()) // NOTE: ignoring errors
-		v.SetInt(int64(i))
+		switch v.Type().Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			v.SetInt(int64(i))
+			lex.next()
+			return
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			v.SetUint(uint64(i))
+			lex.next()
+			return
+		case reflect.Float32, reflect.Float64:
+			v.SetFloat(float64(i))
+			lex.next()
+			return
+		}
+	case scanner.Float:
+		f, _ := strconv.ParseFloat(lex.text(), 64)
+		v.SetFloat(float64(f))
 		lex.next()
 		return
 	case '(':

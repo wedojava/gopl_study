@@ -161,12 +161,10 @@ func TestMarshal(t *testing.T) {
 func TestUnmarshal(t *testing.T) {
 	type Interface interface{}
 	type Record struct {
-		B    bool
-		F32  float32
-		F64  float64
-		C64  complex64
-		C128 complex128
-		I    Interface `sexpr:"face"`
+		B   bool
+		F32 float32
+		F64 float64
+		I   Interface `sexpr:"face"`
 	}
 	Interfaces["sexpr.Interface"] = reflect.TypeOf(int(0))
 	tcs := []struct {
@@ -174,12 +172,12 @@ func TestUnmarshal(t *testing.T) {
 		want Record
 	}{
 		{
-			`((B t) (F32 2.5) (F64 0) (C64 #C(1 2)) (C128 #C(2 3)) (I ("sexpr.Interface" 5)))`,
-			Record{true, 2.5, 0, 1 + 2i, 2 + 3i, Interface(5)},
+			`((B t) (F32 2.5) (F64 0) (I ("sexpr.Interface" 5)))`,
+			Record{true, 2.5, 0, Interface(5)},
 		},
 		{
-			`((B nil) (F32 0) (F64 1.5) (C64 #C(0 0)) (C128 #C(0 1)) (face ("sexpr.Interface" 0)))`,
-			Record{false, 0, 1.5, 0, 1i, Interface(0)},
+			`((B nil) (F32 0) (F64 1.5) (face ("sexpr.Interface" 0)))`,
+			Record{false, 0, 1.5, Interface(0)},
 		},
 	}
 	for _, tc := range tcs {
